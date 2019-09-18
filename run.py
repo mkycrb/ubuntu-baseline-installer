@@ -5,7 +5,7 @@ import os
 
 devnull = open(os.devnull, 'w')
 
-#TODO: atom, tree, gcc, build-essential, make, cmake, net-tools, transmission
+#TODO: atom, tree, gcc, build-essential, make, cmake, net-tools, transmission, vlc
 #TODO: SNAP: acrordrdc
 apps = [
 	'indicator-multiload',
