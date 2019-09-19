@@ -5,19 +5,26 @@ import os
 
 devnull = open(os.devnull, 'w')
 
-#TODO: atom, tree, gcc, build-essential, make, cmake, net-tools, transmission, vlc
+#TODO: atom, vlc
 #TODO: SNAP: acrordrdc
 apps = [
 	'indicator-multiload',
 	'filezilla',
 	'ghex',
-	'google-chrome-stable',
+#	'google-chrome-stable',
 	'kompare',
-	'terminology'
+	'terminology',
+	'tree',
+	'gcc',
+	'build-essential',
+	'make',
+	'cmake',
+	'net-tools',
+	'transmission-gtk'
 ]
 
 pre_task = [
-	'google-chrome-stable',
+#	'google-chrome-stable',
 	'terminology'
 ]
 
