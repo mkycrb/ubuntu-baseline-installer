@@ -20,12 +20,14 @@ apps = [
 	'make',
 	'cmake',
 	'net-tools',
-	'transmission-gtk'
+	'transmission-gtk',
+	'atom'
 ]
 
 pre_task = [
 #	'google-chrome-stable',
-	'terminology'
+	'terminology',
+	'atom'
 ]
 
 post_task = [
@@ -33,7 +35,7 @@ post_task = [
 ]
 
 def pre_tasks(app):
-	print('Running pre-install tasks for ' + app)
+	print('[***UBI***] Running pre-install tasks for ' + app)
 
 	if app == 'google-chrome-stable':
 # First add repo to source list
@@ -55,13 +57,20 @@ def pre_tasks(app):
 # Ideally the following could have been used to check for this:
 #	$ ldconfig -p | grep libefl
 		subprocess.call('sudo apt -y install libefl', shell=True)
-# Make sure any data from previous installs is removed (of new install will fail) 
+# Make sure any data from previous installs is removed (or new install will fail) 
 		subprocess.call('sudo apt remove terminology-data', shell=True)
+
+	if app == 'atom':
+		ret = subprocess.call('wget -qO - https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -', shell=True)
+		if ret != 0:
+			return False
+		subprocess.call('sudo sh -c \'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list\'', shell=True)
+		subprocess.call('sudo apt-get update', shell=True)
 
 	return True
 
 def post_tasks(app):
-	print('Running post-install tasks for ' + app)
+	print('[***UBI***] Running post-install tasks for ' + app)
 
 	if app == 'indicator-multiload':
 # First time start after install will add appropriate file to ~/config/autostart
@@ -75,43 +84,45 @@ def post_tasks(app):
 	return True
 
 def is_installed(app):
-	if subprocess.call('which ' + app, shell=True, stdout=devnull) == 1:
+	output = subprocess.check_output('apt list --installed ' + app, shell=True)
+	if output.find('installed') == -1:
 		return False
 	else:
 		return True
 
 def install(app):
 	ret = True
-	print('Installing ' + app)
+	print('[***UBI***] Installing ' + app)
 
 	if app in pre_task:
 		ret = pre_tasks(app)
 # Pre-task must pass
 	if ret != True:
-		print('Pre-task failed: ' + app)
+		print('[***UBI:ERROR***] Pre-task failed: ' + app)
 		return False
 	else:
 		subprocess.call('sudo apt -y install ' + app, shell=True)
 # Check if install succeeded
 	if is_installed(app) != True:
-		print('Install failed: ' + app)
+		print('[***UBI:ERROR***] Install failed: ' + app)
 		return False
 	else:
+		print('[***UBI***] Install succeeded: ' + app)
 		if app in post_task:
 			ret = post_tasks(app)
 # Warning if post-task fails
 	if ret != True:
-		print('[WARNING] Post-task failed: ' + app)
+		print('[***UBI:WARNING***] Post-task failed: ' + app)
 	return True
 
-subprocess.call('echo "Running Install Script..."', shell=True)
+
+print('[***UBI***] Running Install Script...')
 
 for app in apps:
 	if is_installed(app) == False:
 		install(app)
+	else:
+		print('[***UBI***] ' + app + ' already installed, nothing to do.')
 
-
-
-#output1 = subprocess.check_output('which indicator-multiload', shell=True)
 
 
