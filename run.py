@@ -46,7 +46,7 @@ def pre_tasks(app):
 	
 	if app == 'terminology':
 # First add repo to source list
-		ret = subprocess.call('sudo add-apt-repository ppa:niko2040/e19', shell=True)
+		ret = subprocess.call('sudo add-apt-repository ppa:niko2040/e19 -y', shell=True)
 # Will need to press enter to confirm adding stable repo (vs daily builds)
 		if ret != 0:
 			return False
