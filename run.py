@@ -5,8 +5,8 @@ import os
 
 devnull = open(os.devnull, 'w')
 
-#TODO: atom, vlc
-#TODO: SNAP: acrordrdc
+# TODO: atom, vlc
+# TODO: SNAP: acrordrdc
 apps = [
 	'indicator-multiload',
 	'filezilla',
@@ -21,13 +21,15 @@ apps = [
 	'cmake',
 	'net-tools',
 	'transmission-gtk',
-	'atom'
+	'atom',
+	'diffmerge'
 ]
 
 pre_task = [
 #	'google-chrome-stable',
 	'terminology',
-	'atom'
+	'atom',
+	'diffmerge'
 ]
 
 post_task = [
@@ -42,10 +44,10 @@ def pre_tasks(app):
 		ret = subprocess.call('wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -', shell=True)
 		if ret != 0:
 			return False
-		subprocess.call('sudo sh -c \'echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list\'', shell=True)		
+		subprocess.call('sudo sh -c \'echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list\'', shell=True)
 		subprocess.call('sudo apt-get update', shell=True)
 # Note: To avoid dialog about password for keyring disable auto-login in Ubuntu user settings
-	
+
 	if app == 'terminology':
 # First add repo to source list
 		ret = subprocess.call('sudo add-apt-repository ppa:niko2040/e19 -y', shell=True)
@@ -57,7 +59,7 @@ def pre_tasks(app):
 # Ideally the following could have been used to check for this:
 #	$ ldconfig -p | grep libefl
 		subprocess.call('sudo apt -y install libefl', shell=True)
-# Make sure any data from previous installs is removed (or new install will fail) 
+# Make sure any data from previous installs is removed (or new install will fail)
 		subprocess.call('sudo apt remove terminology-data', shell=True)
 
 	if app == 'atom':
@@ -66,6 +68,16 @@ def pre_tasks(app):
 			return False
 		subprocess.call('sudo sh -c \'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list\'', shell=True)
 		subprocess.call('sudo apt-get update', shell=True)
+
+	if app == 'diffmerge':
+		#ret = subprocess.call('sudo wget -O - http://debian.sourcegear.com/SOURCEGEAR-GPG-KEY | sudo apt-key add -', shell=True)
+		ret = subprocess.call('sudo wget http://download.sourcegear.com/DiffMerge/4.2.0/diffmerge_4.2.0.697.stable_amd64.deb', shell=True)
+		if ret != 0:
+			return False
+		#subprocess.call('sudo sh -c \'echo "deb http://debian.sourcegear.com/ubuntu stable main" >> /etc/apt/sources.list.d/sourcegear.list\'', shell=True)
+		#subprocess.call('sudo apt-get update', shell=True)
+		subprocess.call('sudo dpkg -i diffmerge_4.2.0.*.deb', shell=True)
+		subprocess.call('rm -f diffmerge_4.2.0.697.stable_amd64.deb', shell=True)
 
 	return True
 
@@ -116,13 +128,27 @@ def install(app):
 	return True
 
 
-print('[***UBI***] Running Install Script...')
+# BEGIN MAIN #
+
+lsb=open('/etc/lsb-release','r').read()
+beg=lsb.find('DISTRIB_CODENAME')+(len('DISTRIB_CODENAME')+1)
+sub=lsb[beg:]
+end=sub.find('\n')
+code=sub[:end]
+print('[***UBI***] Running Ubuntu ' + code)
+
+print apps
+input=raw_input('[***UBI***] Enter app name from list above or just press enter for all: ')
+if input in apps:
+	apps = [input]
+elif len(input) != 0:
+	print('[***UBI***] App not found!')
+	apps = []
+else:
+	print('[***UBI***] Running Full Install Script...')
 
 for app in apps:
 	if is_installed(app) == False:
 		install(app)
 	else:
 		print('[***UBI***] ' + app + ' already installed, nothing to do.')
-
-
-
